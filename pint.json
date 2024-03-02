@@ -1,0 +1,61 @@
+{
+  "preset": "psr12",
+  "exclude": [
+    "app/Kernel",
+    "app/Http/Middleware/",
+    "bootstrap",
+    "config",
+    "routes",
+    "tests",
+    "public"
+  ],
+  "rules": {
+    "is_null": true,
+    "simplified_null_return": true,
+    "declare_strict_types": true,
+    "strict_comparison": true,
+    "no_unused_imports": true,
+    "explicit_string_variable": true,
+    "native_function_casing": true,
+    "native_type_declaration_casing": true,
+    "ternary_to_null_coalescing": true,
+    "array_indentation": true,
+    "trim_array_spaces": true,
+    "combine_consecutive_issets": true,
+    "combine_consecutive_unsets": true,
+    "no_multiline_whitespace_around_double_arrow": true,
+    "fully_qualified_strict_types": true,
+    "method_chaining_indentation": true,
+    "global_namespace_import": {
+      "import_classes": true
+    },
+    "new_with_braces": {
+      "anonymous_class": false,
+      "named_class": false
+    },
+    "braces_position": {
+      "classes_opening_brace": "next_line_unless_newline_at_signature_end",
+      "anonymous_classes_opening_brace": "next_line_unless_newline_at_signature_end",
+      "anonymous_functions_opening_brace": "same_line"
+    },
+    "blank_line_after_namespace": true,
+    "blank_lines_before_namespace": true,
+    "blank_line_after_opening_tag": false,
+    "linebreak_after_opening_tag": true,
+    "standardize_not_equals": true,
+    "no_empty_phpdoc": true,
+    "single_trait_insert_per_statement": false,
+    "array_syntax": {
+      "syntax": "short"
+    },
+    "concat_space": {
+      "spacing": "one"
+    },
+    "list_syntax": {
+      "syntax": "short"
+    },
+    "ordered_imports": {
+      "sort_algorithm": "alpha"
+    }
+  }
+}
