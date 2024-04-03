@@ -24,7 +24,6 @@
     "combine_consecutive_issets": true,
     "combine_consecutive_unsets": true,
     "no_multiline_whitespace_around_double_arrow": true,
-    "fully_qualified_strict_types": true,
     "method_chaining_indentation": true,
     "global_namespace_import": {
       "import_classes": true
@@ -39,7 +38,6 @@
       "anonymous_functions_opening_brace": "same_line"
     },
     "blank_line_after_namespace": true,
-    "blank_lines_before_namespace": true,
     "blank_line_after_opening_tag": false,
     "linebreak_after_opening_tag": true,
     "standardize_not_equals": true,
