@@ -1,13 +1,13 @@
 import { Transition } from '@headlessui/react';
 import { InertiaLinkProps, Link } from '@inertiajs/react';
 import {
-    Dispatch,
-    Fragment,
-    PropsWithChildren,
-    SetStateAction,
-    createContext,
-    useContext,
-    useState,
+  Dispatch,
+  Fragment,
+  PropsWithChildren,
+  SetStateAction,
+  createContext,
+  useContext,
+  useState,
 } from 'react';
 
 const DropDownContext = createContext<{

@@ -34,12 +34,13 @@ class Channel extends Model implements HasMedia
     protected function imageUrl(): Attribute
     {
         $image = $this->getFirstMediaUrl('images', 'thumb') ?: 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
+
         return Attribute::make(
             get: fn () => $image,
         );
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')
             ->width(300)

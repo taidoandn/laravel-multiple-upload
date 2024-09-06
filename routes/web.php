@@ -1,7 +1,10 @@
 <?php
+declare(strict_types=1);
 
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VideoController;
+use App\Http\Controllers\VideoFileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,6 +41,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/{channel}/edit', [ChannelController::class, 'edit'])->name('edit');
         Route::put('/{channel}', [ChannelController::class, 'update'])->name('update');
     });
+
+    Route::get('videos', [VideoController::class, 'index'])->name('videos.index');
+    Route::post('videos', [VideoController::class, 'store'])->name('videos.store');
+    Route::delete('videos/{video}', [VideoController::class, 'destroy'])->name('videos.destroy');
+    Route::patch('videos/{video}', [VideoController::class, 'update'])->name('videos.update');
+    Route::post('videos/{video}/file', [VideoFileController::class, 'store'])
+        ->name('videos.file.store');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -64,7 +64,10 @@ export default function Authenticated({
 
                   <Dropdown.Content>
                     <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                    <Dropdown.Link href={route('channel.edit', user.channel.id)}>Channel</Dropdown.Link>
+                    <Dropdown.Link href={route('channel.edit', user.channel.id)}>
+                      Channel
+                    </Dropdown.Link>
+                    <Dropdown.Link href={route('videos.index')}>Upload</Dropdown.Link>
                     <Dropdown.Link
                       href={route('logout')}
                       method="post"
@@ -126,7 +129,10 @@ export default function Authenticated({
 
             <div className="mt-3 space-y-1">
               <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-               <Dropdown.Link href={route('channel.edit', user.channel.id)}>Channel</Dropdown.Link>
+              <ResponsiveNavLink href={route('channel.edit', user.channel.id)}>
+                Channel
+              </ResponsiveNavLink>
+              <ResponsiveNavLink href={route('videos.index')}>Upload</ResponsiveNavLink>
               <ResponsiveNavLink
                 method="post"
                 href={route('logout')}

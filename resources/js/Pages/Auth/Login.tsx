@@ -5,7 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler, useEffect } from 'react';
+import { FormEventHandler } from 'react';
 
 export default function Login({
   status,
@@ -20,16 +20,12 @@ export default function Login({
     remember: false,
   });
 
-  useEffect(() => {
-    return () => {
-      reset('password');
-    };
-  }, []);
-
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
 
-    post(route('login'));
+    post(route('login'), {
+      onFinish: () => reset('password'),
+    });
   };
 
   return (
