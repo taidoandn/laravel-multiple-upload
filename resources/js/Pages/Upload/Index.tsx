@@ -18,7 +18,9 @@ export default function Index({ auth, csrf_token }: PageProps) {
     const newUploads = await Promise.all(
       Array.from(uploadedFiles).map(async (file) => {
         try {
-          const response = await axios.post(route('videos.store'), { title: file.name });
+          const response = await axios.post(route('channel.videos.store', auth.user.channel.uuid), {
+            title: file.name,
+          });
           const { id } = response.data;
           return {
             id,

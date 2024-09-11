@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Video\FileStoreRequest;
+use App\Http\Requests\Video\StoreFileRequest;
+use App\Jobs\ConvertVideo;
 use App\Models\Video;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
 use Pion\Laravel\ChunkUpload\Handler\ContentRangeUploadHandler;
 use Pion\Laravel\ChunkUpload\Receiver\FileReceiver;
 
 class VideoFileController extends Controller
 {
-    public function store(FileStoreRequest $request, Video $video): void
+    public function store(StoreFileRequest $request, Video $video): void
     {
         $receiver = new FileReceiver(
             UploadedFile::fake()->createWithContent('file', $request->getContent()),
@@ -37,7 +37,7 @@ class VideoFileController extends Controller
     protected function storeFile(UploadedFile $file, Video $video)
     {
         $video->update([
-            'video_path' => $file->storeAs('videos', Str::uuid(), 'public')
+            'video_path' => $file->store('videos', 'public'),
         ]);
     }
 }

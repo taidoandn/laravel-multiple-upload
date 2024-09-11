@@ -14,11 +14,14 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('channel_id')->constrained()->cascadeOnDelete();
+            $table->uuid()->index();
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('video_path')->nullable();
-            $table->boolean('encoded')->default(false);
+            $table->string('thumbnail')->nullable();
+            $table->boolean('processed')->default(false);
+            $table->enum('visibility', ['public', 'unlisted', 'private'])->default('private');
             $table->timestamps();
         });
     }

@@ -5,7 +5,7 @@ namespace App\Http\Requests\Video;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class FileStoreRequest extends FormRequest
+class StoreFileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

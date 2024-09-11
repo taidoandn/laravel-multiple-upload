@@ -13,7 +13,7 @@ class VideoPolicy
      */
     public function storeFile(User $user, Video $video): bool
     {
-        return $video->user_id === $user->id;
+        return $video->channel->user_id === $user->id;
     }
 
     /**
@@ -21,7 +21,7 @@ class VideoPolicy
      */
     public function update(User $user, Video $video): bool
     {
-        return $video->user_id === $user->id;
+        return $video->channel->user_id === $user->id;
     }
 
     /**
@@ -29,6 +29,6 @@ class VideoPolicy
      */
     public function delete(User $user, Video $video): bool
     {
-        return $video->user_id === $user->id;
+        return $video->channel->user_id === $user->id;
     }
 }
