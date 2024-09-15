@@ -17,6 +17,8 @@ class Video extends Model
         'channel_id',
         'title',
         'description',
+        'duration',
+        'thumbnail',
         'video_path',
         'encoded',
     ];

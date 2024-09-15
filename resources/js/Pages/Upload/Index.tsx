@@ -1,16 +1,51 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import echo from '@/lib/echo';
+import { cn } from '@/lib/utils';
 import { PageProps, Upload } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { createUpload, UpChunk } from '@mux/upchunk';
 import axios from 'axios';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { UploadItem } from './Partials/UploadItem';
-import { cn } from '@/lib/utils';
 
 export default function Index({ auth, csrf_token }: PageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const uploadRefs = useRef<Record<number, UpChunk>>({});
+
+  useEffect(() => {
+    const channel = echo.private(`videos.user.${auth.user.id}`);
+    channel
+      .listen('ExportVideoThumbnail', (e: { video_id: number; thumbnail: string }) => {
+        const videoId = e.video_id;
+        const upload = uploads.find((upload) => upload.id === videoId);
+        console.log(e);
+
+        if (!upload) return;
+        updateUpload(videoId, { thumbnail: e.thumbnail });
+      })
+      .listen('ConvertVideoStart', (e: { video_id: number }) => {
+        const videoId = e.video_id;
+        const upload = uploads.find((upload) => upload.id === videoId);
+        if (!upload) return;
+        updateUpload(videoId, { processing: true });
+      })
+      .listen('ConvertVideoProgress', (e: { video_id: number; percentage: number }) => {
+        const videoId = e.video_id;
+        const upload = uploads.find((upload) => upload.id === videoId);
+        if (!upload) return;
+        const data =
+          e.percentage === 100
+            ? { processing: false, processProgress: e.percentage }
+            : { processProgress: e.percentage };
+        updateUpload(videoId, data);
+      });
+
+    return () => {
+      echo.leave(`videos.user.${auth.user.id}`);
+    };
+  });
 
   const handleDropFiles = async (uploadedFiles: FileList | null) => {
     if (!uploadedFiles) return;
@@ -28,6 +63,8 @@ export default function Index({ auth, csrf_token }: PageProps) {
             file,
             uploading: true,
             uploadProgress: 0,
+            processing: false,
+            processProgress: 0,
             paused: false,
           };
         } catch (error) {
@@ -77,6 +114,7 @@ export default function Index({ auth, csrf_token }: PageProps) {
       preserveState: true,
       onSuccess: () => {
         setUploads(uploads.filter((upload) => upload.id !== id));
+        toast.success('Video deleted successfully');
       },
     });
   };
@@ -84,9 +122,9 @@ export default function Index({ auth, csrf_token }: PageProps) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+      header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Upload</h2>}
     >
-      <Head title="Dashboard" />
+      <Head title="Upload" />
 
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -98,7 +136,7 @@ export default function Index({ auth, csrf_token }: PageProps) {
               >
                 <label
                   htmlFor="file"
-                  className="flex items-center justify-center w-full h-44 bg-gray-100 border-2 border-dashed border-gray-200 text-gray-500 font-medium"
+                  className="flex items-center justify-center w-full h-44 bg-gray-100 border-2 border-dashed border-gray-200 text-gray-500 font-medium rounded-md"
                 >
                   Drop or click here to upload files
                 </label>
@@ -106,15 +144,21 @@ export default function Index({ auth, csrf_token }: PageProps) {
                   multiple
                   type="file"
                   id="file"
+                  accept="video/*"
                   className={cn('sr-only', { 'bg-gray-200 border-gray-300': isDragging })}
                   onDragOver={() => setIsDragging(true)}
                   onDragLeave={() => setIsDragging(false)}
+                  onClick={(e) => {
+                    e.currentTarget.value = '';
+                  }}
                   onDrop={(e) => {
                     e.preventDefault();
                     handleDropFiles(e.dataTransfer.files);
                     setIsDragging(false);
                   }}
-                  onChange={(e) => handleDropFiles(e.target.files)}
+                  onChange={(e) => {
+                    handleDropFiles(e.target.files);
+                  }}
                 />
               </form>
             </div>

@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Video\StoreFileRequest;
-use App\Jobs\ConvertVideo;
+use App\Jobs\ConvertVideoForStreaming;
+use App\Jobs\CreateVideoThumbnail;
 use App\Models\Video;
 use Illuminate\Http\UploadedFile;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
@@ -39,5 +40,8 @@ class VideoFileController extends Controller
         $video->update([
             'video_path' => $file->store('videos', 'public'),
         ]);
+
+        CreateVideoThumbnail::dispatch($video);
+        ConvertVideoForStreaming::dispatch($video);
     }
 }

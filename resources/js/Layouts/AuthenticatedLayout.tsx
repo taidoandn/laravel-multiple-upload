@@ -5,6 +5,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { User } from '@/types';
 import { Link } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import { Toaster } from 'sonner';
 
 export default function Authenticated({
   user,
@@ -134,7 +135,9 @@ export default function Authenticated({
               <ResponsiveNavLink href={route('channel.edit', user.channel.uuid)}>
                 Channel
               </ResponsiveNavLink>
-              <ResponsiveNavLink href={route('channel.videos.upload', user.channel.uuid)}>Upload</ResponsiveNavLink>
+              <ResponsiveNavLink href={route('channel.videos.upload', user.channel.uuid)}>
+                Upload
+              </ResponsiveNavLink>
               <ResponsiveNavLink
                 method="post"
                 href={route('logout')}
@@ -154,6 +157,10 @@ export default function Authenticated({
       )}
 
       <main>{children}</main>
+      <Toaster
+        richColors
+        closeButton
+      />
     </div>
   );
 }

@@ -12,7 +12,7 @@ class StoreVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->id() == $this->channel->user_id;
+        return auth()->id() === $this->channel->user_id;
     }
 
     /**

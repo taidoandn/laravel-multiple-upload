@@ -8,6 +8,7 @@ export interface User {
 
 export interface Channel {
   id: string;
+  uuid: string;
   name: string;
   description: string | null;
   image_url: string;
@@ -20,6 +21,9 @@ export interface Upload {
   description?: string;
   uploadProgress: number;
   uploading: boolean;
+  processing: boolean;
+  processProgress: number;
+  thumbnail?: string;
   paused: boolean;
 }
 

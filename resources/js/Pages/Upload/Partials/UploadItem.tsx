@@ -1,9 +1,8 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import TextInput from '@/Components/TextInput';
+import { FormInput } from '@/Components/form/FormInput';
+import { FormTextarea } from '@/Components/form/FormTextarea';
 import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Textarea } from '@/Components/ui/textarea';
+import { Progress } from '@/Components/ui/progress';
+import { Skeleton } from '@/Components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Upload } from '@/types';
 import { Transition } from '@headlessui/react';
@@ -28,30 +27,38 @@ export const UploadItem = ({ upload, onCancelUpload }: Props) => {
     <>
       <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
         <div className="flex space-x-6">
-          <div className="max-w-[240px] w-full space-y-3">
+          <div className="max-w-[280px] w-full space-y-3">
+            <div className="overflow-hidden rounded-md">
+              {upload.thumbnail ? (
+                <img
+                  src={upload.thumbnail}
+                  alt={upload.title}
+                  className="h-auto w-auto object-cover aspect-video bg-center bg-cover bg-no-repeat"
+                />
+              ) : (
+                <Skeleton className="h-auto w-auto aspect-video bg-muted" />
+              )}
+            </div>
+            {(upload.uploading || upload.processing) && (
+              <div className="space-y-1">
+                <span className="text-gray-700">
+                  {upload.uploading ? 'Uploading' : 'Processing'}:
+                </span>
+                <Progress
+                  indicatorClassName={cn(upload.uploading ? 'bg-blue-500' : 'bg-green-500')}
+                  value={upload.uploading ? upload.uploadProgress : upload.processProgress}
+                />
+              </div>
+            )}
+
             {upload.uploading && (
-              <div>
-                <div className="space-y-1">
-                  <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                    <div
-                      className="bg-blue-600 text-xs font-medium text-blue-400 text-center p-0.5 leading-none rounded-full"
-                      style={{
-                        width: `${upload.uploadProgress || 0}%`,
-                      }}
-                    >
-                      {upload.uploadProgress || 0}%
-                    </div>
-                  </div>
-                  <div className="text-sm">Uploading</div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Button
-                    onClick={() => onCancelUpload?.(upload.id)}
-                    className={cn('text-sm', 'font-medium')}
-                  >
-                    Cancel
-                  </Button>
-                </div>
+              <div className="flex items-center space-x-3">
+                <Button
+                  onClick={() => onCancelUpload?.(upload.id)}
+                  className={cn('text-sm', 'font-medium')}
+                >
+                  Cancel
+                </Button>
               </div>
             )}
           </div>
@@ -60,47 +67,29 @@ export const UploadItem = ({ upload, onCancelUpload }: Props) => {
             onSubmit={handleSubmit}
           >
             <div>
-              <InputLabel
-                htmlFor={`title-${upload.id}`}
-                value="Title"
-              />
-
-              <Input
+              <FormInput
                 id={`title-${upload.id}`}
                 type="text"
-                name="title"
+                label="Title"
+                placeholder="Title"
+                className="mt-1 block w-full"
                 value={data.title}
                 onChange={(e) => setData('title', e.target.value)}
-                className="mt-1 block w-full"
-                placeholder="Title"
-              />
-
-              <InputError
-                message={errors.title}
-                className="mt-2"
+                errors={errors.title}
               />
             </div>
 
             <div>
-              <InputLabel
-                htmlFor={`description-${upload.id}`}
-                value="Description"
-              />
-
-              <Textarea
+              <FormTextarea
                 id={`description-${upload.id}`}
-                name="description"
+                label="Description"
+                placeholder="Description"
                 value={data.description}
                 onChange={(e) => setData('description', e.target.value)}
-                className="mt-1 block w-full"
-                placeholder="Description"
-              />
-
-              <InputError
-                message={errors.description}
-                className="mt-2"
+                errors={errors.description}
               />
             </div>
+
             <div className="flex items-center space-x-3">
               <Button
                 className={cn({ 'opacity-25': processing })}

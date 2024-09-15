@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid()->index();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->integer('duration')->default(0);
             $table->string('video_path')->nullable();
             $table->string('thumbnail')->nullable();
             $table->boolean('processed')->default(false);
