@@ -1,16 +1,16 @@
+import Dropzone from '@/Components/Dropzone';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import echo from '@/lib/echo';
-import { cn } from '@/lib/utils';
 import { PageProps, Upload } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { createUpload, UpChunk } from '@mux/upchunk';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
+import { FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
 import { UploadItem } from './Partials/UploadItem';
 
 export default function Index({ auth, csrf_token }: PageProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const uploadRefs = useRef<Record<number, UpChunk>>({});
 
@@ -18,40 +18,36 @@ export default function Index({ auth, csrf_token }: PageProps) {
     const channel = echo.private(`videos.user.${auth.user.id}`);
     channel
       .listen('ExportVideoThumbnail', (e: { video_id: number; thumbnail: string }) => {
-        const videoId = e.video_id;
-        const upload = uploads.find((upload) => upload.id === videoId);
-        console.log(e);
-
-        if (!upload) return;
-        updateUpload(videoId, { thumbnail: e.thumbnail });
+        updateUpload(e.video_id, { thumbnail: e.thumbnail });
       })
       .listen('ConvertVideoStart', (e: { video_id: number }) => {
-        const videoId = e.video_id;
-        const upload = uploads.find((upload) => upload.id === videoId);
-        if (!upload) return;
-        updateUpload(videoId, { processing: true });
+        updateUpload(e.video_id, { processing: true });
       })
       .listen('ConvertVideoProgress', (e: { video_id: number; percentage: number }) => {
-        const videoId = e.video_id;
-        const upload = uploads.find((upload) => upload.id === videoId);
-        if (!upload) return;
         const data =
           e.percentage === 100
             ? { processing: false, processProgress: e.percentage }
             : { processProgress: e.percentage };
-        updateUpload(videoId, data);
+        updateUpload(e.video_id, data);
       });
 
     return () => {
       echo.leave(`videos.user.${auth.user.id}`);
     };
-  });
+  }, []);
 
-  const handleDropFiles = async (uploadedFiles: FileList | null) => {
-    if (!uploadedFiles) return;
+  const handleDropFiles = async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+    if (fileRejections.length) {
+      fileRejections.forEach((fileRejection) => {
+        toast.error(`Error file: ${fileRejection.file.name}`, {
+          description: fileRejection.errors[0].message,
+        });
+      });
+    }
+    if (!acceptedFiles) return;
 
     const newUploads = await Promise.all(
-      Array.from(uploadedFiles).map(async (file) => {
+      Array.from(acceptedFiles).map(async (file) => {
         try {
           const response = await axios.post(route('channel.videos.store', auth.user.channel.uuid), {
             title: file.name,
@@ -68,7 +64,7 @@ export default function Index({ auth, csrf_token }: PageProps) {
             paused: false,
           };
         } catch (error) {
-          console.error('Error uploading file:', error);
+          toast.error(`Error uploading file ${file.name}`);
           return null;
         }
       }),
@@ -99,7 +95,7 @@ export default function Index({ auth, csrf_token }: PageProps) {
       updateUpload(id, { uploadProgress: progress.detail.toFixed(2) }),
     );
     uploadRefs.current[id].on('success', () => updateUpload(id, { uploading: false }));
-    uploadRefs.current[id].on('error', (error) => console.log(error.detail.message));
+    uploadRefs.current[id].on('error', (error) => toast.error(error.detail.message));
   };
 
   const onCancelUpload = (id: Upload['id']) => {
@@ -134,32 +130,13 @@ export default function Index({ auth, csrf_token }: PageProps) {
                 action=""
                 className="p-6 text-gray-900"
               >
-                <label
-                  htmlFor="file"
-                  className="flex items-center justify-center w-full h-44 bg-gray-100 border-2 border-dashed border-gray-200 text-gray-500 font-medium rounded-md"
-                >
-                  Drop or click here to upload files
-                </label>
-                <input
+                <Dropzone
+                  maxFiles={2}
+                  maxSize={20 * 1024 * 1024}
                   multiple
-                  type="file"
-                  id="file"
-                  accept="video/*"
-                  className={cn('sr-only', { 'bg-gray-200 border-gray-300': isDragging })}
-                  onDragOver={() => setIsDragging(true)}
-                  onDragLeave={() => setIsDragging(false)}
-                  onClick={(e) => {
-                    e.currentTarget.value = '';
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    handleDropFiles(e.dataTransfer.files);
-                    setIsDragging(false);
-                  }}
-                  onChange={(e) => {
-                    handleDropFiles(e.target.files);
-                  }}
-                />
+                  accept={{ 'video/*': [] }}
+                  onDrop={handleDropFiles}
+                ></Dropzone>
               </form>
             </div>
           </div>
