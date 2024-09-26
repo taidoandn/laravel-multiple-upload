@@ -1,4 +1,5 @@
 import { FormInput } from '@/Components/form/FormInput';
+import { FormSelect } from '@/Components/form/FormSelect';
 import { FormTextarea } from '@/Components/form/FormTextarea';
 import { Button } from '@/Components/ui/button';
 import { Progress } from '@/Components/ui/progress';
@@ -16,6 +17,7 @@ export const UploadItem = ({ upload, onCancelUpload }: Props) => {
   const { data, setData, errors, processing, recentlySuccessful, patch } = useForm({
     title: upload.title,
     description: '',
+    visibility: 'private',
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -87,6 +89,22 @@ export const UploadItem = ({ upload, onCancelUpload }: Props) => {
                 value={data.description}
                 onChange={(e) => setData('description', e.target.value)}
                 errors={errors.description}
+              />
+            </div>
+
+            <div>
+              <FormSelect
+                id={`visibility-${upload.id}`}
+                label="Visibility"
+                options={[
+                  { label: 'Private', value: 'private' },
+                  { label: 'Unlisted', value: 'unlisted' },
+                  { label: 'Public', value: 'public' },
+                ]}
+                placeholder="Visibility"
+                value={data.visibility}
+                onChange={(value) => setData('visibility', value)}
+                errors={errors.visibility}
               />
             </div>
 

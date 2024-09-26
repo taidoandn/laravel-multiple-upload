@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Video;
 
+use App\Enums\Visibility;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -25,6 +27,7 @@ class UpdateRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'visibility' => ['nullable', 'string', Rule::enum(Visibility::class)],
         ];
     }
 }

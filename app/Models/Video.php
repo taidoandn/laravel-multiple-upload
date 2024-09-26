@@ -21,6 +21,7 @@ class Video extends Model
         'thumbnail',
         'video_path',
         'encoded',
+        'visibility',
     ];
 
     public function uniqueIds()
