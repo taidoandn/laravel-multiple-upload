@@ -2,7 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import { Button } from '@/Components/ui/button';
-import { Channel } from '@/types';
+import { Channel } from '@/types/channel';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
 import { CameraIcon } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function UpdateChannelForm({ channel, className = '' }: Props) {
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
-    post(route('channel.update', channel.id), {
+    post(route('channel.update', channel.uuid), {
       forceFormData: true,
     });
   };

@@ -18,11 +18,14 @@ return new class extends Migration
             $table->uuid()->index();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->integer('duration')->default(0);
+            $table->integer('duration')->unsigned()->default(0);
             $table->string('video_path')->nullable();
             $table->string('thumbnail')->nullable();
             $table->boolean('processed')->default(false);
+            $table->boolean('allow_votes')->default(true);
+            $table->boolean('allow_comments')->default(true);
             $table->enum('visibility', ['public', 'unlisted', 'private'])->default('private');
+            $table->integer('views')->unsigned()->default(0);
             $table->timestamps();
         });
     }

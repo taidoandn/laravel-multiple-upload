@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Channel, PageProps } from '@/types';
+import { PageProps } from '@/types';
+import { Channel } from '@/types/channel';
 import { Head } from '@inertiajs/react';
 import UpdateChannelForm from './Partials/UpdateChannelForm';
 

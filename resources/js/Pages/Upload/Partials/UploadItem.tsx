@@ -1,11 +1,9 @@
-import { FormInput } from '@/Components/form/FormInput';
-import { FormSelect } from '@/Components/form/FormSelect';
-import { FormTextarea } from '@/Components/form/FormTextarea';
+import { FormInput, FormTextarea, FormSelect } from '@/Components/form';
 import { Button } from '@/Components/ui/button';
 import { Progress } from '@/Components/ui/progress';
 import { Skeleton } from '@/Components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Upload } from '@/types';
+import { Upload } from '@/types/upload';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
 

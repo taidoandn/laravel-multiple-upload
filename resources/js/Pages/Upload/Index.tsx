@@ -1,7 +1,8 @@
 import Dropzone from '@/Components/Dropzone';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import echo from '@/lib/echo';
-import { PageProps, Upload } from '@/types';
+import { PageProps } from '@/types';
+import { Upload } from '@/types/upload';
 import { Head, router } from '@inertiajs/react';
 import { createUpload, UpChunk } from '@mux/upchunk';
 import axios from 'axios';

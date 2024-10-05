@@ -3,28 +3,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = [
-        'channel_id',
-        'title',
-        'description',
-        'duration',
-        'thumbnail',
-        'video_path',
-        'encoded',
-        'visibility',
-    ];
+    protected $guarded = [];
 
-    public function uniqueIds()
+    public function uniqueIds(): array
     {
         return ['uuid'];
     }
@@ -39,4 +32,10 @@ class Video extends Model
         return $this->hasOneThrough(User::class, Channel::class);
     }
 
+    public function thumbnail(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => Storage::url($value),
+        );
+    }
 }
