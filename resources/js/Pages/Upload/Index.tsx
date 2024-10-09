@@ -4,16 +4,15 @@ import echo from '@/lib/echo';
 import { PageProps } from '@/types';
 import { Upload } from '@/types/upload';
 import { Head, router } from '@inertiajs/react';
-import { createUpload, UpChunk } from '@mux/upchunk';
+import { createUpload } from '@mux/upchunk';
 import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FileRejection } from 'react-dropzone';
 import { toast } from 'sonner';
 import { UploadItem } from './Partials/UploadItem';
 
 export default function Index({ auth, csrf_token }: PageProps) {
   const [uploads, setUploads] = useState<Upload[]>([]);
-  const uploadRefs = useRef<Record<number, UpChunk>>({});
 
   useEffect(() => {
     const channel = echo.private(`videos.user.${auth.user.id}`);
@@ -22,14 +21,16 @@ export default function Index({ auth, csrf_token }: PageProps) {
         updateUpload(e.video_id, { thumbnail: e.thumbnail });
       })
       .listen('ConvertVideoStart', (e: { video_id: number }) => {
-        updateUpload(e.video_id, { processing: true });
+        updateUpload(e.video_id, { status: 'processing', uploadProgress: 0 });
       })
       .listen('ConvertVideoProgress', (e: { video_id: number; percentage: number }) => {
-        const data =
-          e.percentage === 100
-            ? { processing: false, processProgress: e.percentage }
-            : { processProgress: e.percentage };
-        updateUpload(e.video_id, data);
+        const percentage = e.percentage;
+        const videoId = e.video_id;
+        if (percentage === 100) {
+          updateUpload(videoId, { status: 'success', uploadProgress: percentage });
+        } else {
+          updateUpload(videoId, { uploadProgress: percentage });
+        }
       });
 
     return () => {
@@ -37,43 +38,34 @@ export default function Index({ auth, csrf_token }: PageProps) {
     };
   }, []);
 
-  const handleDropFiles = async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
-    if (fileRejections.length) {
-      fileRejections.forEach((fileRejection) => {
-        toast.error(`Error file: ${fileRejection.file.name}`, {
-          description: fileRejection.errors[0].message,
-        });
+  const handleDropFiles = async (acceptedFiles: File[]) => {
+    if (!acceptedFiles.length) return;
+
+    const promises = acceptedFiles.map((file) => {
+      return axios.post(route('channel.videos.store', auth.user.channel.uuid), {
+        title: file.name,
       });
-    }
-    if (!acceptedFiles) return;
+    });
 
-    const newUploads = await Promise.all(
-      Array.from(acceptedFiles).map(async (file) => {
-        try {
-          const response = await axios.post(route('channel.videos.store', auth.user.channel.uuid), {
-            title: file.name,
-          });
-          const { id } = response.data;
-          return {
-            id,
-            title: file.name,
-            file,
-            uploading: true,
-            uploadProgress: 0,
-            processing: false,
-            processProgress: 0,
-            paused: false,
-          };
-        } catch (error) {
-          toast.error(`Error uploading file ${file.name}`);
-          return null;
-        }
-      }),
-    );
+    const newUploads: Upload[] = [];
+    const responses = await Promise.allSettled(promises);
+    responses.forEach((response, index) => {
+      if (response.status === 'rejected') {
+        toast.error(`Error uploading file: ${acceptedFiles[index].name}`, {
+          description: response.reason.message,
+        });
+      } else {
+        newUploads.push({
+          id: response.value.data.id,
+          title: acceptedFiles[index].name,
+          file: startChunkedUpload(response.value.data.id, acceptedFiles[index]),
+          uploadProgress: 0,
+          status: 'idle',
+        });
+      }
+    });
 
-    const validUploads = newUploads.filter(Boolean) as Upload[];
-    setUploads((prevUploads) => [...prevUploads, ...validUploads]);
-    validUploads.forEach((upload) => startUpload(upload.id, upload.file));
+    setUploads((prevUploads) => [...newUploads, ...prevUploads]);
   };
 
   const updateUpload = (id: number, data: Omit<Partial<Upload>, 'id'>) => {
@@ -82,8 +74,8 @@ export default function Index({ auth, csrf_token }: PageProps) {
     );
   };
 
-  const startUpload = (id: number, file: File) => {
-    uploadRefs.current[id] = createUpload({
+  const startChunkedUpload = (id: number, file: File) => {
+    const upload = createUpload({
       endpoint: route('videos.file.store', id),
       file,
       headers: { 'X-CSRF-TOKEN': csrf_token },
@@ -91,20 +83,24 @@ export default function Index({ auth, csrf_token }: PageProps) {
       chunkSize: 10 * 1024,
     });
 
-    uploadRefs.current[id].on('attempt', () => updateUpload(id, { uploading: true }));
-    uploadRefs.current[id].on('progress', (progress) =>
+    upload.on('attempt', () => updateUpload(id, { status: 'uploading' }));
+    upload.on('progress', (progress) =>
       updateUpload(id, { uploadProgress: progress.detail.toFixed(2) }),
     );
-    uploadRefs.current[id].on('success', () => updateUpload(id, { uploading: false }));
-    uploadRefs.current[id].on('error', (error) => toast.error(error.detail.message));
+    upload.on('success', () => updateUpload(id, { status: 'idle', uploadProgress: 0 }));
+    upload.on('error', (error) => {
+      updateUpload(id, { status: 'error' });
+      toast.error(error.detail.message);
+    });
+    return upload;
   };
 
   const onCancelUpload = (id: Upload['id']) => {
-    if (!uploadRefs.current[id]) {
+    const upload = uploads.find((upload) => upload.id === id);
+    if (!upload) {
       return;
     }
-    uploadRefs.current[id].abort();
-    delete uploadRefs.current[id];
+    upload.file.abort();
 
     router.delete(route('videos.destroy', id), {
       preserveScroll: true,
@@ -132,9 +128,7 @@ export default function Index({ auth, csrf_token }: PageProps) {
                 className="p-6 text-gray-900"
               >
                 <Dropzone
-                  maxFiles={2}
                   maxSize={20 * 1024 * 1024}
-                  multiple
                   accept={{ 'video/*': [] }}
                   onDrop={handleDropFiles}
                 ></Dropzone>

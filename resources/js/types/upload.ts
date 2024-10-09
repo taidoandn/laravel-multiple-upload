@@ -1,12 +1,11 @@
+import { UpChunk } from '@mux/upchunk';
+
 export interface Upload {
   id: number;
   title: string;
-  file: File;
+  file: UpChunk;
   description?: string;
+  status: 'idle' | 'uploading' | 'processing' | 'success' | 'error';
   uploadProgress: number;
-  uploading: boolean;
-  processing: boolean;
-  processProgress: number;
   thumbnail?: string;
-  paused: boolean;
 }

@@ -39,19 +39,19 @@ export const UploadItem = ({ upload, onCancelUpload }: Props) => {
                 <Skeleton className="h-auto w-auto aspect-video bg-muted" />
               )}
             </div>
-            {(upload.uploading || upload.processing) && (
+            {['uploading', 'processing'].includes(upload.status) && (
               <div className="space-y-1">
-                <span className="text-gray-700">
-                  {upload.uploading ? 'Uploading' : 'Processing'}:
-                </span>
+                <span className="text-gray-700 capitalize">{upload.status}:</span>
                 <Progress
-                  indicatorClassName={cn(upload.uploading ? 'bg-blue-500' : 'bg-green-500')}
-                  value={upload.uploading ? upload.uploadProgress : upload.processProgress}
+                  indicatorClassName={cn(
+                    upload.status === 'uploading' ? 'bg-blue-500' : 'bg-green-500',
+                  )}
+                  value={upload.uploadProgress}
                 />
               </div>
             )}
 
-            {upload.uploading && (
+            {upload.status === 'uploading' && (
               <div className="flex items-center space-x-3">
                 <Button
                   onClick={() => onCancelUpload?.(upload.id)}
