@@ -8,5 +8,5 @@ declare global {
     Pusher: typeof Pusher;
   }
 
-  var route: typeof ziggyRoute;
+  const route: typeof ziggyRoute;
 }
