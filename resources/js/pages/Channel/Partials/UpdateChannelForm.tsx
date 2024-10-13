@@ -46,7 +46,7 @@ export default function UpdateChannelForm({ channel, className = '' }: Props) {
 
   useEffect(() => {
     return () => {
-      preview && URL.revokeObjectURL(preview);
+      URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
